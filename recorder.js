@@ -40,6 +40,8 @@ var Recorder = {
     this.clearBindings("recordingStart");
     this.clearBindings("recordingProgress");
     this.clearBindings("recordingCancel");
+    this.clearBindings("recordingStop");
+    this.clearBindings("playingStop");
 
     this.bind('recordingStart',  this._defaultOnHideFlash);
     this.bind('recordingCancel', this._defaultOnHideFlash);
@@ -49,6 +51,7 @@ var Recorder = {
     this.bind('recordingStart',    options['start']);
     this.bind('recordingProgress', options['progress']);
     this.bind('recordingCancel',   options['cancel']);
+    this.bind('recordingStop',     options['finish']);
 
     this.flashInterface().record();
   },
@@ -60,6 +63,8 @@ var Recorder = {
   play: function(options){
     options = options || {};
     this.clearBindings("playingProgress");
+    this.clearBindings("playingStop");
+    this.clearBindings("recordingStop");
     this.bind('playingProgress', options['progress']);
     this.bind('playingStop', options['finished']);
     
