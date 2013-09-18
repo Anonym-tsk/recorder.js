@@ -54,7 +54,7 @@ package
 		protected var sound:Sound;
 		protected var channel:SoundChannel;
 		protected var recordingStartTime:int = 0;
-		protected static var sampleRate:Number = 44.1;
+		protected static var sampleRate:Number = 8;
 		
 		protected function record():void
 		{
@@ -232,7 +232,7 @@ package
 			var wavWriter:WAVWriter = new WAVWriter();
 			buffer.position = 0;
 			wavWriter.numOfChannels = 1; // set the inital properties of the Wave Writer
-			wavWriter.sampleBitRate = 16;
+			wavWriter.sampleBitRate = 8;
 			wavWriter.samplingRate = sampleRate * 1000;
 			wavWriter.processSamples(wavData, buffer, sampleRate * 1000, 1);
 			return wavData;
