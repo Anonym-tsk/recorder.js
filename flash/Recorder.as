@@ -1,4 +1,4 @@
-package  
+package
 {
 	import com.adobe.audio.format.WAVWriter;
 	import flash.events.TimerEvent;
@@ -16,7 +16,7 @@ package
 	import flash.system.Security;
 	import flash.system.SecurityPanel;
 	import flash.events.StatusEvent;
-    import flash.utils.getQualifiedClassName;
+	import flash.utils.getQualifiedClassName;
 	
 	import mx.collections.ArrayCollection;
 	
@@ -25,27 +25,26 @@ package
 	
 	public class Recorder
 	{
-		public function Recorder(logger)
+		public function Recorder(logger:Logger):void
 		{
 			this.logger = logger;
 		}
 		
-		private var logger;
+		private var logger:Logger;
 		public function addExternalInterfaceCallbacks():void {
-			ExternalInterface.addCallback("record", 		this.record);
-			ExternalInterface.addCallback("_stop",  		this.stop);
-			ExternalInterface.addCallback("_play",          this.play);
-			ExternalInterface.addCallback("upload",         this.upload);
-			ExternalInterface.addCallback("audioData",      this.audioData);
-			ExternalInterface.addCallback("showFlash",      this.showFlash);
-			ExternalInterface.addCallback("recordingDuration",     this.recordingDuration);
-			ExternalInterface.addCallback("playDuration",     this.playDuration);
+			ExternalInterface.addCallback("record", this.record);
+			ExternalInterface.addCallback("_stop", this.stop);
+			ExternalInterface.addCallback("_play", this.play);
+			ExternalInterface.addCallback("upload", this.upload);
+			ExternalInterface.addCallback("audioData", this.audioData);
+			ExternalInterface.addCallback("showFlash", this.showFlash);
+			ExternalInterface.addCallback("recordingDuration", this.recordingDuration);
+			ExternalInterface.addCallback("playDuration", this.playDuration);
 
 			triggerEvent("initialized", {});
 			logger.log("Recorder initialized");
 		}
 
-		
 		protected var isRecording:Boolean = false;
 		protected var isPlaying:Boolean = false;
 		protected var microphoneWasMuted:Boolean;
@@ -54,20 +53,21 @@ package
 		protected var buffer:ByteArray = new ByteArray();
 		protected var sound:Sound;
 		protected var channel:SoundChannel;
-		protected var recordingStartTime = 0;
-		protected static var sampleRate = 44.1;
+		protected var recordingStartTime:int = 0;
+		protected static var sampleRate:Number = 44.1;
 		
 		protected function record():void
 		{
-			if(!microphone){ 
+			if(!microphone) {
 				setupMicrophone();
 			}
 
 			microphoneWasMuted = microphone.muted;
-			if(microphoneWasMuted){
+			if (microphoneWasMuted) {
 				logger.log('showFlashRequired');
 				triggerEvent('showFlash','');
-			}else{
+			}
+			else {
 				notifyRecordingStarted();
 			}
 
@@ -94,16 +94,16 @@ package
 			sound.addEventListener(SampleDataEvent.SAMPLE_DATA, playSampleDataHandler);
 			
 			channel = sound.play();
-			channel.addEventListener(Event.SOUND_COMPLETE, function(){
+			channel.addEventListener(Event.SOUND_COMPLETE, function():void {
 				playStop();
-			});  
+			});
 			
-			if(playingProgressTimer){
+			if (playingProgressTimer) {
 				playingProgressTimer.reset();
 			}
 			playingProgressTimer = new Timer(250);
-			var that = this;
-			playingProgressTimer.addEventListener(TimerEvent.TIMER, function playingProgressTimerHandler(event:TimerEvent){
+			var that:Recorder = this;
+			playingProgressTimer.addEventListener(TimerEvent.TIMER, function playingProgressTimerHandler(event:TimerEvent):void {
 				triggerEvent('playingProgress', that.playDuration());
 			});
 			playingProgressTimer.start();
@@ -118,7 +118,7 @@ package
 		protected function playStop():void
 		{
 			logger.log('stopPlaying');
-			if(channel){
+			if (channel) {
 				channel.stop();
 				playingProgressTimer.reset();
 				
@@ -127,13 +127,13 @@ package
 			}
 		}
 		
-		/* Networking functions */ 
+		/* Networking functions */
 		
-		protected function upload(uri:String, audioParam:String, parameters): void
+		protected function upload(uri:String, audioParam:String, parameters:*):void
 		{
 			logger.log("upload");
 			buffer.position = 0;
-			var wav:ByteArray = prepareWav();					
+			var wav:ByteArray = prepareWav();
 			var ml:MultipartURLLoader = new MultipartURLLoader();
 			ml.addEventListener(Event.COMPLETE, onReady);
 			function onReady(e:Event):void
@@ -142,40 +142,40 @@ package
 				logger.log('uploading done');
 			}
 			
-			if(getQualifiedClassName(parameters.constructor) == "Array"){
-				for(var i=0; i<parameters.length; i++){
+			if (getQualifiedClassName(parameters.constructor) == "Array") {
+				for (var i:int = 0; i < parameters.length; i++) {
 					ml.addVariable(parameters[i][0], parameters[i][1]);
 				}
-			}else{
-				for(var k in parameters){
+			}
+			else {
+				for (var k:* in parameters) {
 					ml.addVariable(k, parameters[k]);
 				}
 			}
 			
 			ml.addFile(wav, 'audio.wav', audioParam);
 			ml.load(uri, false);
-			
 		}
 		
-		private function externalInterfaceEncode(data:String){
+		private function externalInterfaceEncode(data:String):String {
 			return data.split("%").join("%25").split("\\").join("%5c").split("\"").join("%22").split("&").join("%26");
 		}
 		
-		protected function audioData(newData:String=null):String
+		protected function audioData(newData:String = null):String
 		{
-			var delimiter = ";"
-			if(newData){
+			var delimiter:String = ";"
+			if (newData) {
 				buffer = new ByteArray();
-				var splittedData = newData.split(delimiter);
-				for(var i=0; i < splittedData.length; i++){
+				var splittedData:Array = newData.split(delimiter);
+				for (var i:int = 0; i < splittedData.length; i++) {
 					buffer.writeFloat(parseFloat(splittedData[i]));
 				}
 				return "";
-			}else{
-				var ret:String="";
+			}
+			else {
+				var ret:String = "";
 				buffer.position = 0;
-				while (buffer.bytesAvailable > 0)
-				{
+				while (buffer.bytesAvailable > 0) {
 					ret += buffer.readFloat().toString() + delimiter;
 				}
 				return ret;
@@ -185,10 +185,10 @@ package
 		protected function showFlash():void
 		{
 			Security.showSettings(SecurityPanel.PRIVACY);
-			triggerEvent('showFlash','');	
+			triggerEvent('showFlash','');
 		}
 		
-		/* Recording Helper */ 
+		/* Recording Helper */
 		protected function setupMicrophone():void
 		{
 			logger.log('setupMicrophone');
@@ -197,12 +197,13 @@ package
 			microphone.setSilenceLevel(0);
 			microphone.rate = sampleRate;
 			microphone.gain = 50;
-			microphone.addEventListener(StatusEvent.STATUS, function statusHandler(e:Event) {
+			microphone.addEventListener(StatusEvent.STATUS, function statusHandler(e:Event):void {
 				logger.log('Microphone Status Change');
-				if(microphone.muted){
+				if (microphone.muted) {
 					triggerEvent('recordingCancel','');
-				}else{
-					if(!isRecording){
+				}
+				else {
+					if (!isRecording) {
 						notifyRecordingStarted();
 					}
 				}
@@ -213,7 +214,7 @@ package
 		
 		protected function notifyRecordingStarted():void
 		{
-			if(microphoneWasMuted){
+			if (microphoneWasMuted) {
 				microphoneWasMuted = false;
 				triggerEvent('hideFlash','');
 			}
@@ -228,10 +229,10 @@ package
 		protected function prepareWav():ByteArray
 		{
 			var wavData:ByteArray = new ByteArray();
-			var wavWriter:WAVWriter = new WAVWriter(); 
+			var wavWriter:WAVWriter = new WAVWriter();
 			buffer.position = 0;
-			wavWriter.numOfChannels = 1; // set the inital properties of the Wave Writer 
-			wavWriter.sampleBitRate = 16; 
+			wavWriter.numOfChannels = 1; // set the inital properties of the Wave Writer
+			wavWriter.sampleBitRate = 16;
 			wavWriter.samplingRate = sampleRate * 1000;
 			wavWriter.processSamples(wavData, buffer, sampleRate * 1000, 1);
 			return wavData;
@@ -239,7 +240,7 @@ package
 		
 		protected function recordingDuration():int
 		{
-			var duration = int(getTimer() - recordingStartTime);
+			var duration:int = int(getTimer() - recordingStartTime);
 			return Math.max(duration, 0);
 		}
 
@@ -249,34 +250,32 @@ package
 		}
 		
 		protected function recordSampleDataHandler(event:SampleDataEvent):void
-		{	
-			while(event.data.bytesAvailable)
-			{	
+		{
+			while (event.data.bytesAvailable) {
 				var sample:Number = event.data.readFloat();
 				
 				buffer.writeFloat(sample);
-				if(buffer.length % 40000 == 0){
-					triggerEvent('recordingProgress', recordingDuration(), 	microphone.activityLevel);
-				}	
+				if (buffer.length % 40000 == 0) {
+					triggerEvent('recordingProgress', recordingDuration(), microphone.activityLevel);
+				}
 			}
 		}
 		
 		protected function playSampleDataHandler(event:SampleDataEvent):void
 		{
-			var expectedSampleRate = 44.1;
-			var writtenSamples = 0;
-			var channels = 2;
-			var maxSamples = 8192 * channels;
+			var expectedSampleRate:Number = 44.1;
+			var writtenSamples:int = 0;
+			var channels:int = 2;
+			var maxSamples:int = 8192 * channels;
 			// if the sampleRate doesn't match the expectedSampleRate of flash.media.Sound (44.1) write the sample multiple times
 			// this will result in a little down pitchshift.
 			// also write 2 times for stereo channels
-			while(writtenSamples < maxSamples && buffer.bytesAvailable)
-			{
+			while (writtenSamples < maxSamples && buffer.bytesAvailable) {
 				var sample:Number = buffer.readFloat();
-			  for (var j:int = 0; j < channels * (expectedSampleRate / sampleRate); j++){
+				for (var j:int = 0; j < channels * (expectedSampleRate / sampleRate); j++) {
 					event.data.writeFloat(sample);
 					writtenSamples++;
-					if(writtenSamples >= maxSamples){
+					if (writtenSamples >= maxSamples) {
 						break;
 					}
 				}
@@ -286,8 +285,8 @@ package
 		
 		/* ExternalInterface Communication */
 		
-		protected function triggerEvent(eventName:String, arg0, arg1 = null):void
-		{	
+		protected function triggerEvent(eventName:String, arg0:*, arg1:* = null):void
+		{
 			ExternalInterface.call("Recorder.triggerEvent", eventName, arg0, arg1);
 		}
 	}
