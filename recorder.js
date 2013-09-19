@@ -75,10 +75,16 @@ var Recorder = {
     options.audioParam = options.audioParam || "audio";
     options.params     = options.params || {};
     this.clearBindings("uploadSuccess");
+    this.clearBindings("uploadProgress");
+    this.clearBindings("uploadIoError");
+    this.clearBindings("uploadSecurityError");
     this.bind("uploadSuccess", function(responseText){
       options.success(Recorder._externalInterfaceDecode(responseText));
     });
-    
+    this.bind("uploadProgress", options['progress']);
+    this.bind("uploadIoError", options['error']);
+    this.bind("uploadSecurityError", options['error']);
+
     this.flashInterface().upload(options.url, options.audioParam, options.params);
   },
   

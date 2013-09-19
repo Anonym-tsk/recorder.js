@@ -5,6 +5,9 @@ package
 	import flash.events.Event;
 	import flash.events.ErrorEvent;
 	import flash.events.SampleDataEvent;
+	import flash.events.IOErrorEvent;
+	import flash.events.ProgressEvent;
+	import flash.events.SecurityErrorEvent;
 	import flash.external.ExternalInterface;
 	import flash.media.Microphone;
 	import flash.media.Sound;
@@ -17,9 +20,7 @@ package
 	import flash.system.SecurityPanel;
 	import flash.events.StatusEvent;
 	import flash.utils.getQualifiedClassName;
-	
 	import mx.collections.ArrayCollection;
-	
 	import ru.inspirit.net.MultipartURLLoader;
 
 	
@@ -141,7 +142,25 @@ package
 				triggerEvent('uploadSuccess', externalInterfaceEncode(e.target.loader.data));
 				logger.log('uploading done');
 			}
-			
+			ml.addEventListener(ProgressEvent.PROGRESS, onProgress);
+			function onProgress(e:ProgressEvent):void
+			{
+				triggerEvent('uploadProgress', e.target.loader.bytesLoaded);
+				logger.log('upload progress');
+			}
+			ml.addEventListener(IOErrorEvent.IO_ERROR, onIOErrorEvent);
+			function onIOErrorEvent(e:IOErrorEvent):void
+			{
+				triggerEvent('uploadIoError', e);
+				logger.log('io error occurred during upload');
+			}
+			ml.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityErrorEvent);
+			function onSecurityErrorEvent(e:SecurityErrorEvent):void
+			{
+				triggerEvent('uploadSecurityError', e);
+				logger.log('security error occurred during upload');
+			}
+
 			if (getQualifiedClassName(parameters.constructor) == "Array") {
 				for (var i:int = 0; i < parameters.length; i++) {
 					ml.addVariable(parameters[i][0], parameters[i][1]);
