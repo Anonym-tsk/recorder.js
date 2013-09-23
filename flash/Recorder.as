@@ -78,11 +78,14 @@ package
 		
 		protected function recordStop():int
 		{
-			logger.log('stopRecording');
-			isRecording = false;
-			triggerEvent('recordingStop', {duration: recordingDuration()});
-			microphone.removeEventListener(SampleDataEvent.SAMPLE_DATA, recordSampleDataHandler);
-			return recordingDuration();
+			if (isRecording) {
+				logger.log('stopRecording');
+				isRecording = false;
+				triggerEvent('recordingStop', {duration: recordingDuration()});
+				microphone.removeEventListener(SampleDataEvent.SAMPLE_DATA, recordSampleDataHandler);
+				return recordingDuration();
+			}
+			return 0;
 		}
 		
 		protected function play():void
