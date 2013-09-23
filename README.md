@@ -6,10 +6,12 @@ Currently the recording functionality is backed by Adobe Flash but will extended
 
 ## Getting started
 
-  * Copy these 2 files somewhere into your website directory:
+  * Copy these 3 files somewhere into your website directory:
+    * [swfobject.js](https://code.google.com/p/swfobject/downloads/list)
     * recorder.js
     * recorder.swf
-  * Add the script to your HTML: ```<script type="text/javascript" src="path/to/recorder.swf"></script>```
+  * Add the script to your HTML: ```<script type="text/javascript" src="path/to/swfobject.swf"></script>```
+  * And this: ```<script type="text/javascript" src="path/to/recorder.swf"></script>```
   * Use the ``Recorder`` object to ``initialize`` and ``record`` (see usage... :)
 
 ## Examples
@@ -23,12 +25,9 @@ Currently the recording functionality is backed by Adobe Flash but will extended
 The Recorder needs to be initialized. Usage:
 
       Recorder.initialize({
-        swfSrc: "./recorder.swf"                                  // URL to recorder.swf
-        // optional:
-        flashContainer: document.getElementById("somecontainer"), // (optional) element where recorder.swf will be placed (needs to be 230x140 px)
-        onFlashSecurity: function(){                              // (optional) callback when the flash swf needs to be visible
-                                                                  // this allows you to hide/show the flashContainer element on demand.
-        },
+        swfSrc: "./recorder.swf",                                   // URL to recorder.swf
+        flashContainer: document.getElementById("somecontainer"),   // (optional) element where recorder.swf will be placed (needs to be 230x140 px)
+        onFlashSecurity: function(){}                               // (optional) callback when the flash swf needs to be visible
       });
 
 If flashContainer and onFlashSecurity is not passed as options an invisible ``DIV`` element including the Recorder.swf will be
@@ -44,12 +43,10 @@ Once the actual recording starts an onRecording callback that you can pass to as
 Usage:
 
       Recorder.record({
-        start: function(){                 // will be called when the recording started 
-                                           // which could be delayed because Adobe Flash asks the user for microphone access permission
-        }
-        progress: function(milliseconds){  // will be called in a <1s frequency with the current position in milliseconds
-          
-        },
+        start: function(){},                        // will be called when the recording started which could be delayed because Adobe Flash asks the user for microphone access permission
+        progress: function(milliseconds, level){},  // will be called in a <1s frequency with the current position in milliseconds and current mic level
+        cancel: function(){},                       // will be called when the recording cancelled
+        finish: function(event){}                   // will be called when the recording finished with object {duration: milliseconds}
       });
 
 ### Recorder.play(options)
@@ -57,12 +54,8 @@ Usage:
 Will play the recorded audio. Usage:
 
       Recorder.play({
-        finished: function(){               // will be called when playback is finished
-          
-        },
-        progress: function(milliseconds){  // will be called in a <1s frequency with the current position in milliseconds
-          
-        }
+        finished: function(){},               // will be called when playback is finished
+        progress: function(milliseconds){}    // will be called in a <1s frequency with the current position in milliseconds
       })
 
 ### Recorder.stop()
@@ -74,19 +67,15 @@ Will stop the current recording or playing.
 Will initiate a multipart POST (or PUT) to upload the recorded audio. Usage:
 
       Recorder.upload({
-        method: "POST"                             // (not implemented) (optional, defaults to POST) HTTP Method can be either POST or PUT 
+        method: "POST",                            // (not implemented) (optional, defaults to POST) HTTP Method can be either POST or PUT 
         url: "http://api.soundcloud.com/tracks",   // URL to upload to (needs to have a suitable crossdomain.xml for Adobe Flash)
         audioParam: "track[asset_data]",           // Name for the audio data parameter
         params: {                                  // Additional parameters (needs to be a flat object)
           "track[title]": "some track",
           "oauth_token":  "VALID_TOKEN"
         },
-        success: function(responseText){           // will be called after successful upload
-        
-        },
-        error: function(){                  // (not implemented) will be called if an error occurrs
-        
-        },
-        progress: NULL                      // (not yet implemented)
+        success: function(responseText){},         // will be called after successful upload
+        error: function(event){},                  // will be called if an error occurrs with the error event object
+        progress: function(bytes){}                // will be called when file uploads with the uploaded bytes value
       });
 
