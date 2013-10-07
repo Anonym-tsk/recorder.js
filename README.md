@@ -71,6 +71,7 @@ Will initiate a multipart POST (or PUT) to upload the recorded audio. Usage:
         url: "http://api.soundcloud.com/tracks",   // URL to upload to (needs to have a suitable crossdomain.xml for Adobe Flash)
         audioParam: "track[asset_data]",           // Name for the audio data parameter
         params: {                                  // Additional parameters (needs to be a flat object)
+          "x-filename": "audio.wav",               // Changes uploaded filename, won't be passed as normal parameter
           "track[title]": "some track",
           "oauth_token":  "VALID_TOKEN"
         },
@@ -79,3 +80,5 @@ Will initiate a multipart POST (or PUT) to upload the recorded audio. Usage:
         progress: function(bytes){}                // will be called when file uploads with the uploaded bytes value
       });
 
+Note the "x-filename" params key and value. "x-filename" is a special keyword used to change the name of the uploaded file.
+It defaults the "audio.wav" if not specified.
