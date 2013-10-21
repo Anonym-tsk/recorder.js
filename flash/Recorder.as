@@ -275,12 +275,9 @@ package
 		{
 			while (event.data.bytesAvailable) {
 				var sample:Number = event.data.readFloat();
-				
 				buffer.writeFloat(sample);
-				if (buffer.length % (sampleRate * 1000) == 0) {
-					triggerEvent('recordingProgress', recordingDuration(), microphone.activityLevel);
-				}
 			}
+      triggerEvent('recordingProgress', recordingDuration(), microphone.activityLevel);
 		}
 		
 		protected function playSampleDataHandler(event:SampleDataEvent):void
